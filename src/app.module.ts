@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BullModule } from '@nestjs/bullmq';
 import { PersonaModule } from './persona/persona.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RubricsModule } from './rubrics/rubrics.module';
 import { GlossaryModule } from './glossary/glossary.module';
 import { QuickRoleplayModule } from './quick-roleplay/quick-roleplay.module';
@@ -20,11 +20,14 @@ import { MulterModule } from '@nestjs/platform-express';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          url: configService.get<string>('REDIS_URL'),
+        },
+      }),
+      inject: [ConfigService],
     }),
     PersonaModule,
     RubricsModule,
