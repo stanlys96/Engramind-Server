@@ -9,7 +9,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto, LoginDto } from './user.dto';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class UsersService {
@@ -26,8 +26,11 @@ export class UsersService {
       }
       const { password, ...safeUser } = user;
       return { message: 'User found', success: true, ...safeUser };
-    } catch {
-      throw new UnauthorizedException('Invalid credentials');
+    } catch (e) {
+      return {
+        message: e?.toString(),
+        success: false,
+      };
     }
   }
 
@@ -58,7 +61,12 @@ export class UsersService {
         email,
         name,
       };
-    } catch (e) {}
+    } catch (e) {
+      return {
+        success: false,
+        message: e?.toString(),
+      };
+    }
   }
 
   async login(loginDto: LoginDto) {
@@ -83,12 +91,13 @@ export class UsersService {
         message: 'Login successful',
         userId: userData.id,
         name: userData.name,
+        email: userData.email,
         accessToken,
         refreshToken,
       };
       return payload;
-    } catch {
-      return { message: 'Invalid credentials' };
+    } catch (e) {
+      return { message: 'Invalid credentials', success: false };
     }
   }
 }
