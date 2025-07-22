@@ -1,12 +1,22 @@
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './user.service';
-import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Query } from '@nestjs/common';
 import { CreateUserDto, LoginDto } from './user.dto';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @ApiOperation({ summary: 'Get a user' })
+  @Get('user')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Returns the specified user',
+  })
+  getUser(@Query('email') email: string): any {
+    return this.usersService.findByEmail(email);
+  }
 
   @ApiOperation({ summary: 'Register user by email' })
   @Post('register')

@@ -1,7 +1,6 @@
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   BadRequestException,
@@ -17,8 +16,20 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private jwtService: JwtService,
   ) {}
+
+  async findByEmail(email: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { email } });
+      if (!user) {
+        throw new UnauthorizedException('Invalid credentials');
+      }
+      const { password, ...safeUser } = user;
+      return { message: 'User found', success: true, ...safeUser };
+    } catch {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+  }
 
   async register(createUserDto: CreateUserDto) {
     try {
@@ -42,8 +53,10 @@ export class UsersService {
       });
       await this.userRepository.save(newUser);
       return {
-        message: 'Success',
+        message: 'Register successful',
+        success: true,
         email,
+        name,
       };
     } catch (e) {}
   }
