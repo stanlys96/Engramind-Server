@@ -18,7 +18,7 @@ export class DeleteFileProcessor extends WorkerHost {
     const { id, data } = job;
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 120 * 1000);
+      const timeout = setTimeout(() => controller.abort(), 30 * 1000);
       await job.updateProgress(10);
       try {
         const response = await axiosElwyn.delete(
